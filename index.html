@@ -366,11 +366,16 @@
         this.state.history.map(function (data) {
           accumulatedPoints=accumulatedPoints+data.points;
         });
+
+        var scorePanel="";
+        if(this.state.currentRound <= globalData.totalRounds) {
+            scorePanel= <ScorePanel><ScoreForm round={this.state.currentRound} fromPosition={this.state.fromPosition} handleScoreSubmit={this.handleScoreSubmit}/></ScorePanel>;
+        }
         return (
           <div >
             <h1 id="start">Putting game scorer</h1><br />  
             <StatsPanel round={this.state.currentRound} fromPosition={this.state.fromPosition} totalPoints={accumulatedPoints}/>
-            <ScorePanel><ScoreForm round={this.state.currentRound} fromPosition={this.state.fromPosition} handleScoreSubmit={this.handleScoreSubmit}/></ScorePanel>
+            {scorePanel}
             <HistoryPanel history={this.state.history} />
             <ResetPanel handleScoreReset={this.handleScoreReset} />
             <CDGCPanel />
