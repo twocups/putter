@@ -107,7 +107,8 @@
         }
 
         this.refs.score.getDOMNode().value = "";
-        //this.refs.score.getDOMNode().focus(); 
+        //this.refs.score.getDOMNode().focus();
+        $(document.body).scrollTop($('#start').offset().top);
 
         
       },
@@ -351,7 +352,6 @@
           var newState={currentRound: nextRound, fromPosition: nextStartPosition, history: historicScores};
           this.setState(newState);
           localStorage['scores']=JSON.stringify(newState);
-          React.findDOMNode(this.refs.start).focus();  
         
       },
 
@@ -365,7 +365,7 @@
         });
         return (
           <div >
-            <h1 ref="start">Putting game scorer</h1><br />  
+            <h1 id="start">Putting game scorer</h1><br />  
             <StatsPanel round={this.state.currentRound} fromPosition={this.state.fromPosition} totalPoints={accumulatedPoints}/>
             <ScorePanel><ScoreForm round={this.state.currentRound} fromPosition={this.state.fromPosition} handleScoreSubmit={this.handleScoreSubmit}/></ScorePanel>
             <HistoryPanel history={this.state.history} />
