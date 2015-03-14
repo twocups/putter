@@ -1,0 +1,372 @@
+<html>
+  <head>
+    <title>Putting Game Scorer</title>
+    <script src="lib/underscore-min.js"></script>
+    <script src="lib/react-0.12.2.js"></script>
+    <script src="lib/JSXTransformer-0.12.2.js"></script>
+    <script src="lib/jquery-1.10.0.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" >
+    <link href="bootstrap/css/orig.bootstrap.min.css" rel="stylesheet" >
+    <link href="style.css" rel="stylesheet" >
+  </head>
+  <body>
+    <div id="content" class="container">
+      Loading...
+    </div>
+    <script type="text/jsx">
+
+    /* 
+      work in progress !!
+      james@5point6.net on behalf of the disc golf community 
+    */
+
+    var globalData = {
+      totalRounds : 20 //total number of rounds to play
+    };
+
+      //History row
+      var HistoryPanel = React.createClass({
+        render: function() {
+
+          var accumulatedPoints=0;
+          var rows = this.props.history.map(function (data) {
+            accumulatedPoints=accumulatedPoints+data.points;
+            return (
+              <HistoryRow round={data.round} fromPosition={data.fromPosition} score={data.score} points={data.points} totalPoints={accumulatedPoints}/>
+              );
+          });
+
+          return (
+            <div className="row">
+              <div className="col-xs-12 col-md-5">
+                <div className="panel panel-primary">
+                  <div className="panel-heading">
+                    <h3 className="panel-title">History</h3>
+                  </div>                  
+                  <div className="panel-body" >
+                      <table className="table table-striped">
+                        <thead><td>#</td><td>From</td><td>Score</td><td>Points</td><td>Total</td></thead>
+                        <tbody>
+                          {rows}
+                        </tbody>
+                      </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        }
+      });
+
+
+      //History row
+      var HistoryRow = React.createClass({
+        render: function() {
+          return (
+            <tr>
+              <td>{this.props.round}</td>
+              <td>{this.props.fromPosition+'m'}</td>
+              <td>{this.props.score}</td>
+              <td>{this.props.points}</td>
+              <td>{this.props.totalPoints}</td>
+
+            </tr>
+          );
+        }
+      });
+
+      //Container for form
+      var ScorePanel = React.createClass({
+        render: function() {
+          return (
+            <div className="row">
+              <div className="col-xs-12 col-md-5">
+                <div className="panel panel-primary">
+                  <div className="panel-heading">
+                    <h3 className="panel-title">Round score</h3>
+                  </div>                  
+                  <div className="panel-body" >{this.props.children}</div>
+                </div>
+              </div>
+            </div>
+          );
+        }
+      });
+
+    //Score submit form
+     var ScoreForm = React.createClass({
+      handleSubmit: function(e) {
+        e.preventDefault();
+        var score = parseInt(this.refs.score.getDOMNode().value.trim());
+
+        if(score >=0 && score <=5) {
+          //pass to parent handler
+          this.props.handleScoreSubmit({score: score});
+        } else {
+          alert('Bad score, must be between 0 and 5!')
+        }
+
+        this.refs.score.getDOMNode().value = "";
+        this.refs.score.getDOMNode().focus();         
+        
+      },
+      render: function() {
+
+        return (
+          <form  onSubmit={this.handleSubmit} >
+            <div className="row" >
+                <div className="col-xs-6">Score for round {this.props.round}:<br />(from {this.props.fromPosition+'m'})</div>
+                <div>
+                  <input className="form-group" type="number" placeholder="out of 5" ref="score" />
+                </div>
+            </div>
+            <div className="row" >
+            <div className="col-xs-6"></div>
+              <div className="col-xs-6">
+              <input type="submit" value="Save score"  className="btn btn-primary btn-md"/>  
+              </div>
+            </div>
+          </form>
+        );
+      }
+    });
+
+
+
+      //Stats panel
+      var StatsPanel = React.createClass({
+        render: function() {
+          var numberStyle={fontSize: "40px", fontWeight: "bold"};
+          var numberUnitStyle={fontSize: "20px", fontWeight: "bold"};
+          var progress=Math.floor(((this.props.round-1)/globalData.totalRounds) * 100) +"%";
+          var gameScoreLine;
+
+          if(this.props.round > globalData.totalRounds) {
+                gameScoreLine=<div>
+                <div  className="well" >
+                  <div className="row">
+                        <div className="col-xs-12 text-center">
+                          <p style={numberStyle}>Total  {this.props.totalPoints}</p>
+                        </div>
+
+                  </div>
+                </div>
+                <ProgressBar progress={progress} />
+                </div>
+                ;
+
+
+          } else {
+
+             gameScoreLine=<div>
+                  <div  className="well" >
+                  <div className="row">
+                      <div className="col-xs-4 text-center">
+                        Round
+                      </div>
+                      <div className="col-xs-4 text-center">
+                        Position
+                      </div>
+                      <div className="col-xs-4 text-center">
+                        Points
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-xs-4 text-center">
+                        <p style={numberStyle} >#{this.props.round}</p>
+                      </div>
+                      <div className="col-xs-4 text-center">
+                        <p style={numberStyle} >{this.props.fromPosition}<span style={numberUnitStyle}>m</span></p>
+                      </div>
+                       <div className="col-xs-4 text-center">
+                        <p style={numberStyle} >{this.props.totalPoints}</p>
+                      </div>
+                    </div>
+                  </div>
+                    <ProgressBar progress={progress} />
+                  </div>;
+
+           }
+
+          return (
+            <div className="row">
+              <div className="col-xs-12 col-md-5">
+                <div className="panel panel-primary">
+                  <div className="panel-heading">
+                    <h3 className="panel-title">Game progress</h3>
+                  </div>                  
+                  <div className="panel-body" >
+                      {gameScoreLine}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        }
+      });
+
+    var ProgressBar = React.createClass({
+      render: function() {
+        var progressStyle={width: this.props.progress};
+        return(
+        <div className="progress">
+          <div className="progress-bar progress-bar-striped" role="progressbar"  style={progressStyle}>{this.props.progress}</div>
+        </div>);
+      }
+
+    });
+
+
+    var ResetPanel = React.createClass({
+      handleReset : function() {
+          this.props.handleScoreReset();
+      },
+      render: function() {
+        var center={textAlign:"center"}
+        return(
+          <div >
+         <div className="dropdown">
+          <button className="btn btn-danger dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" >
+            Reset scores
+            <span className="caret"></span>
+          </button>
+          <ul className="dropdown-menu" role="menu" >
+            <li onClick={this.handleReset} role="presentation"><a role="menuitem" tabindex="-1" href="#">Confirm, start again</a></li>
+          </ul>
+        </div>  
+        </div>
+
+       );
+      }
+
+    });
+
+
+    var CDGCPanel = React.createClass({
+      handleReset : function() {
+          this.props.handleScoreReset();
+      },
+      render: function() {
+        var center={textAlign:"center"}
+        return(
+            <div style={center}>
+              <a target="_blank" href="http://www.croydondiscgolf.com">
+                <img src="images/cdgc.png" alt="Croydon Disc Golf Club" />
+              </a>
+              <p className="text-center">Croydon Disc Golf Club</p>
+              <p className="text-center">London{"\'"}s only fully basketed disc golf course </p>
+            </div>
+
+       );
+      }
+
+    });
+
+
+
+
+    var Page = React.createClass({
+      getInitialState: function() {
+
+        //load settings from local storage
+        var data=false;
+
+        if(typeof(Storage)!=='undefined') {
+          
+          if(localStorage['scores']) {
+            data=JSON.parse(localStorage['scores']);
+          }
+
+          if(!data) {
+            var scores={currentRound: 1, fromPosition: 10, history: [] };
+            localStorage['scores']=JSON.stringify(scores);
+            data=scores;
+          }
+        
+        } else {
+          alert('Sorry, your device doesnt appear to support local storage which sort of sux');
+        }
+
+        return data;
+      },
+      handleScoreReset: function() {
+        var scores={currentRound: 1, fromPosition: 10, history: [] };
+        localStorage['scores']=JSON.stringify(scores);
+        this.setState(scores);
+      },
+      handleScoreSubmit: function(score) {
+       
+        var score=score.score;
+        var nextRound=this.state.currentRound +1;
+        var nextStartPosition=10;
+
+              switch(score) {
+                case 5:
+                    nextStartPosition=10;
+                    break;
+                case 4:
+                    nextStartPosition=9;
+                    break;
+                case 3:
+                    nextStartPosition=8;
+                    break;
+               case 2:
+                    nextStartPosition=7;
+                    break;
+               case 1:
+                    nextStartPosition=6;
+                    break;
+               case 0:
+                    nextStartPosition=5;
+                    break;
+                default:
+                    //shouldnt ever get here!
+                    nextStartPosition=5;
+              }
+
+          var historicScore = {
+            round : this.state.currentRound,
+            score : score,
+            points : nextStartPosition*score, //same as points
+            fromPosition : this.state.fromPosition
+          };
+
+          var historicScores=this.state.history;
+          historicScores.push(historicScore);
+          var newState={currentRound: nextRound, fromPosition: nextStartPosition, history: historicScores};
+          this.setState(newState);
+          localStorage['scores']=JSON.stringify(newState);
+        
+      },
+
+
+      render: function() { 
+
+        //calculate points!
+        var accumulatedPoints=0;
+        this.state.history.map(function (data) {
+          accumulatedPoints=accumulatedPoints+data.points;
+        });
+        return (
+          <div >
+            <h1>Putting game scorer</h1><br />  
+            <StatsPanel round={this.state.currentRound} fromPosition={this.state.fromPosition} totalPoints={accumulatedPoints}/>
+            <ScorePanel><ScoreForm round={this.state.currentRound} fromPosition={this.state.fromPosition} handleScoreSubmit={this.handleScoreSubmit}/></ScorePanel>
+            <HistoryPanel history={this.state.history} />
+            <ResetPanel handleScoreReset={this.handleScoreReset} />
+            <CDGCPanel />
+          </div>
+        );
+      }
+    });
+
+
+      React.render(
+        <Page  />,
+        document.getElementById('content')
+      );
+
+    </script>
+    <script src="bootstrap/js/bootstrap.js"> </script>
+  </body>
+</html>
