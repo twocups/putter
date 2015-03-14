@@ -117,7 +117,7 @@
             <div className="row" >
                 <div className="col-xs-6">Score for round {this.props.round}:<br />(from {this.props.fromPosition+'m'})</div>
                 <div>
-                  <input className="form-group" type="number" placeholder="out of 5" ref="score" />
+                  <input className="form-group" type="text" pattern="[0-5]+" placeholder="out of 5" ref="score" />
                 </div>
             </div>
             <div className="row" >
