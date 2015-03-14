@@ -50,6 +50,9 @@
                           {rows}
                         </tbody>
                       </table>
+                  <div className="well text-center" >
+                    You can copy and paste these details and email yourself!
+                  </div>
                   </div>
                 </div>
               </div>
@@ -106,7 +109,7 @@
           alert('Bad score, must be between 0 and 5!')
         }
 
-        this.refs.score.getDOMNode().value = "";
+        //this.refs.score.getDOMNode().value = "";
         //this.refs.score.getDOMNode().focus();
         $(document.body).scrollTop($('#start').offset().top);
 
