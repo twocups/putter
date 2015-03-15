@@ -26,6 +26,9 @@
 
       //History row
       var HistoryPanel = React.createClass({
+        handleDeleteLastResult: function() {
+          this.props.handleDeleteLastResult();
+        },
         render: function() {
 
           var accumulatedPoints=0;
@@ -55,6 +58,15 @@
                   <div className="well text-center" >
                     You can copy and paste these details and email yourself!
                   </div>
+                  <div className="btn-group">
+                  <button className="btn btn-danger dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" >
+                    Delete last score&nbsp;
+                    <span className="caret"></span>
+                  </button>
+                  <ul className="dropdown-menu" role="menu" >
+                    <li onClick={this.handleDeleteLastResult} role="presentation"><a role="menuitem" tabIndex="-1" href="#">Confirm, delete the last score</a></li>
+                  </ul>
+                </div>  
                   </div>
                 </div>
               </div>
@@ -105,37 +117,45 @@
         render: function() {
 
           var distanceStats={
-            "5" : 0,
-            "6" : 0,
-            "7" : 0,
-            "8" : 0,
-            "9" : 0,
-            "10" : 0,
-            "total": 0,
+            "5" : {scored: 0, numThrows: 0, points: 0},
+            "6" : {scored: 0, numThrows: 0, points: 0},
+            "7" : {scored: 0, numThrows: 0, points: 0},
+            "8" : {scored: 0, numThrows: 0, points: 0},
+            "9" : {scored: 0, numThrows: 0, points: 0},
+            "10" : {scored: 0, numThrows: 0, points: 0},
+            "total":  {scored: 0, numThrows: 0, points: 0},
           };
 
           var numThrows=this.props.roundData.length*5;
           var totalPoints=0;
+          var throwsPerTurn=5;
 
           this.props.roundData.map(function (data) {
-            distanceStats[data.fromPosition]=parseInt(distanceStats[data.fromPosition])+parseInt(data.score);
-            distanceStats.total=distanceStats.total+parseInt(data.score);
-            totalPoints=totalPoints+data.points;
+            distanceStats[data.fromPosition].scored=parseInt(distanceStats[data.fromPosition].scored)+parseInt(data.score);
+            distanceStats[data.fromPosition].numThrows=parseInt(distanceStats[data.fromPosition].numThrows)+throwsPerTurn;
+            distanceStats[data.fromPosition].points=parseInt(distanceStats[data.fromPosition].points)+parseInt(data.points);
+
+            distanceStats['total'].scored=parseInt(distanceStats['total'].scored)+parseInt(data.score);
+            distanceStats['total'].numThrows=parseInt(distanceStats['total'].numThrows)+throwsPerTurn;
+            distanceStats['total'].points=parseInt(distanceStats['total'].points)+parseInt(data.points);
+
+
           });
 
-
+          var numThowsOffset=numThrows+0.000001;
+          
           return (
             <div>
                   <table className="table table-striped">
                     <thead><th>Distance</th><th>Scored</th><th>%</th><th>Points</th></thead>
                     <tbody>
-                      <RoundGraphsRow distance="5m" score={distanceStats['5']+'/'+numThrows} percent={Math.round((distanceStats['5']/numThrows)*100,2)} points={5*distanceStats['5']} />
-                     <RoundGraphsRow distance="6m" score={distanceStats['6']+'/'+numThrows} percent={Math.round((distanceStats['6']/numThrows)*100,2)} points={6*distanceStats['6']} />
-                     <RoundGraphsRow distance="7m" score={distanceStats['7']+'/'+numThrows} percent={Math.round((distanceStats['7']/numThrows)*100,2)} points={7*distanceStats['7']} />
-                     <RoundGraphsRow distance="8m" score={distanceStats['8']+'/'+numThrows} percent={Math.round((distanceStats['8']/numThrows)*100,2)} points={8*distanceStats['8']} />
-                     <RoundGraphsRow distance="9m" score={distanceStats['9']+'/'+numThrows} percent={Math.round((distanceStats['9']/numThrows)*100,2)} points={9*distanceStats['9']} />
-                     <RoundGraphsRow distance="10m" score={distanceStats['10']+'/'+numThrows} percent={Math.round((distanceStats['10']/numThrows)*100,2)} points={10*distanceStats['10']} />
-                     <RoundGraphsRow distance="Total" score={distanceStats['total']+'/'+numThrows} percent={Math.round((distanceStats['total']/numThrows)*100,2)} points={totalPoints} />
+                     <RoundGraphsRow distance="5m" score={distanceStats['5'].scored+'/'+distanceStats['5'].numThrows} percent={Math.round((distanceStats['5'].scored/(distanceStats['5'].numThrows+0.0001))*100,2)} points={distanceStats['5'].points} />
+                     <RoundGraphsRow distance="6m" score={distanceStats['6'].scored+'/'+distanceStats['6'].numThrows} percent={Math.round((distanceStats['6'].scored/(distanceStats['6'].numThrows+0.0001))*100,2)} points={distanceStats['6'].points} />
+                     <RoundGraphsRow distance="7m" score={distanceStats['7'].scored+'/'+distanceStats['7'].numThrows} percent={Math.round((distanceStats['7'].scored/(distanceStats['7'].numThrows+0.0001))*100,2)} points={distanceStats['7'].points} />
+                     <RoundGraphsRow distance="8m" score={distanceStats['8'].scored+'/'+distanceStats['8'].numThrows} percent={Math.round((distanceStats['8'].scored/(distanceStats['8'].numThrows+0.0001))*100,2)} points={distanceStats['8'].points} />
+                     <RoundGraphsRow distance="9m" score={distanceStats['9'].scored+'/'+distanceStats['9'].numThrows} percent={Math.round((distanceStats['9'].scored/(distanceStats['9'].numThrows+0.0001))*100,2)} points={distanceStats['9'].points} />
+                     <RoundGraphsRow distance="10m" score={distanceStats['10'].scored+'/'+distanceStats['10'].numThrows} percent={Math.round((distanceStats['10'].scored/(distanceStats['10'].numThrows+0.0001))*100,2)} points={distanceStats['10'].points} />
+                     <RoundGraphsRow distance="Total" score={distanceStats['total'].scored+'/'+distanceStats['total'].numThrows} percent={Math.round((distanceStats['total'].scored/(distanceStats['total'].numThrows+0.0001))*100,2)} points={distanceStats['total'].points} />
                     </tbody>
                   </table>
             </div>
@@ -153,7 +173,7 @@
 
               <td>{this.props.score}</td>
               <td>
-                 {this.props.percent}
+                 {this.props.percent}%
               </td>
               <td>{this.props.points}</td>
             </tr>
@@ -588,6 +608,17 @@
         //$(document.body).scrollTop($('#start').offset().top);
 
       },
+      handleDeleteLastResult: function() {
+        var newState=this.state;
+        var history=newState.playerData[this.state.selectedPlayer].history;
+        history.splice(history.length-1, 1);
+        newState.playerData[this.state.selectedPlayer].currentRound=1+newState.playerData[this.state.selectedPlayer].history.length;
+        newState.playerData[this.state.selectedPlayer].history=history;
+
+        localStorage['scores']=JSON.stringify(newState);
+        this.setState(newState);
+
+      },
       handleScoreReset: function() {
         var playerState=this.state.playerData[this.state.selectedPlayer];
         var resetScores={playerName: playerState.playerName, currentRound: 1, fromPosition: 10, history: [] };
@@ -719,7 +750,7 @@
              <BasicPanel title="Statistics">
               <RoundGraphs roundData={playerState.history}/>
             </BasicPanel>
-            <HistoryPanel playerName={playerState.playerName}  history={playerState.history} />
+            <HistoryPanel handleDeleteLastResult={this.handleDeleteLastResult} playerName={playerState.playerName}  history={playerState.history} />
             <BasicPanel title="Player settings"><PlayerSettingsForm handlePlayerSettings={this.handlePlayerSettings}playerName={playerState.playerName} /></BasicPanel>
 
             <PlayerList handlePlayerLink={this.handlePlayerLink} players={this.state.playerData} currentPlayer={this.state.selectedPlayer} addNewPlayer={this.addNewPlayer} />
