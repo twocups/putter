@@ -47,7 +47,7 @@
                   </div>                  
                   <div className="panel-body" >
                       <table className="table table-striped">
-                        <thead><td>#</td><td>From</td><td>Score</td><td>Points</td><td>Total</td></thead>
+                        <thead><th>#</th><th>From</th><th>Score</th><th>Points</th><th>Total</th></thead>
                         <tbody>
                           {rows}
                         </tbody>
@@ -94,6 +94,71 @@
                 </div>
               </div>
             </div>
+          );
+        }
+      });
+
+
+
+      
+      var RoundGraphs = React.createClass({
+        render: function() {
+
+          var distanceStats={
+            "5" : 0,
+            "6" : 0,
+            "7" : 0,
+            "8" : 0,
+            "9" : 0,
+            "10" : 0,
+            "total": 0,
+          };
+
+          var numThrows=this.props.roundData.length*5;
+          var totalPoints=0;
+
+          this.props.roundData.map(function (data) {
+            distanceStats[data.fromPosition]=parseInt(distanceStats[data.fromPosition])+parseInt(data.score);
+            distanceStats.total=distanceStats.total+parseInt(data.score);
+            totalPoints=totalPoints+data.points;
+          });
+
+
+          return (
+            <div>
+                  <table className="table table-striped">
+                    <thead><th>Distance</th><th>Scored</th><th>%</th><th>Points</th></thead>
+                    <tbody>
+                      <RoundGraphsRow distance="5m" score={distanceStats['5']+'/'+numThrows} percent={Math.round((distanceStats['5']/numThrows)*100,2)} points={5*distanceStats['5']} />
+                     <RoundGraphsRow distance="6m" score={distanceStats['6']+'/'+numThrows} percent={Math.round((distanceStats['6']/numThrows)*100,2)} points={6*distanceStats['6']} />
+                     <RoundGraphsRow distance="7m" score={distanceStats['7']+'/'+numThrows} percent={Math.round((distanceStats['7']/numThrows)*100,2)} points={7*distanceStats['7']} />
+                     <RoundGraphsRow distance="8m" score={distanceStats['8']+'/'+numThrows} percent={Math.round((distanceStats['8']/numThrows)*100,2)} points={8*distanceStats['8']} />
+                     <RoundGraphsRow distance="9m" score={distanceStats['9']+'/'+numThrows} percent={Math.round((distanceStats['9']/numThrows)*100,2)} points={9*distanceStats['9']} />
+                     <RoundGraphsRow distance="10m" score={distanceStats['10']+'/'+numThrows} percent={Math.round((distanceStats['10']/numThrows)*100,2)} points={10*distanceStats['10']} />
+                     <RoundGraphsRow distance="Total" score={distanceStats['total']+'/'+numThrows} percent={Math.round((distanceStats['total']/numThrows)*100,2)} points={totalPoints} />
+                    </tbody>
+                  </table>
+            </div>
+          );
+        }
+      });
+
+
+      var RoundGraphsRow = React.createClass({
+        render: function() {
+          var progstyle={width: this.props.percent+"%"};
+          return (
+            <tr>
+              <td>{this.props.distance}</td>
+
+              <td>{this.props.score}</td>
+              <td>
+                 {this.props.percent}
+              </td>
+              <td>{this.props.points}</td>
+            </tr>
+      
+
           );
         }
       });
@@ -280,7 +345,7 @@
               <div className="col-xs-12 col-md-5">
                 <div className="panel panel-primary">
                   <div className="panel-heading">
-                    <h3 className="panel-title">{playerName}</h3>
+                    <h3 className="panel-title">Player: {playerName}</h3>
                   </div>                  
                   <div className="panel-body" >
                       {gameScoreLine}
@@ -424,7 +489,7 @@
                 </div>                  
                 <div className="panel-body" >
                    <table className="table table-striped">
-                    <thead><td>Player</td><td>Played</td><td>Next</td><td>Points</td></thead>
+                    <thead><th>Player</th><th>Played</th><th>Next</th><th>Points</th></thead>
                     <tbody>
                       {rows}
                     </tbody>
@@ -587,7 +652,7 @@
         var nextRound=playerState.currentRound +1;
         var nextStartPosition=10;
 
-              switch(score) {
+              switch(parseInt(score)) {
                 case 5:
                     nextStartPosition=10;
                     break;
@@ -651,8 +716,12 @@
             <h1 id="start">Putting game scorer</h1><br />  
             <StatsPanel totalRounds={this.state.totalRounds} playerName={playerState.playerName} round={playerState.currentRound} fromPosition={playerState.fromPosition} totalPoints={accumulatedPoints}/>
             {scorePanel}
+             <BasicPanel title="Statistics">
+              <RoundGraphs roundData={playerState.history}/>
+            </BasicPanel>
             <HistoryPanel playerName={playerState.playerName}  history={playerState.history} />
             <BasicPanel title="Player settings"><PlayerSettingsForm handlePlayerSettings={this.handlePlayerSettings}playerName={playerState.playerName} /></BasicPanel>
+
             <PlayerList handlePlayerLink={this.handlePlayerLink} players={this.state.playerData} currentPlayer={this.state.selectedPlayer} addNewPlayer={this.addNewPlayer} />
             <ResetPanel handleScoreResetAll={this.handleScoreResetAll} handleDeletePlayer={this.handleDeletePlayer} handleScoreReset={this.handleScoreReset} />
             <br /><br /><CDGCPanel />
