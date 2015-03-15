@@ -535,14 +535,17 @@
         var returnData;
 
         //get player from url
-        var player=getParameterByName('player');
-        if (player=="" || player == undefined) {player='Player 1'}
+        var resetQ=getParameterByName('reset');
+        var doReset=false;
+        if(resetQ=="true") {
+            doReset=true;
+        }
        
 
         if(typeof(Storage)!=='undefined') {
           
           //get pre-existing data store
-          if(localStorage['scores']) {
+          if(localStorage['scores'] && !doReset) {
             data=JSON.parse(localStorage['scores']);
           }
 
@@ -562,21 +565,14 @@
             data=scores;
           }
 
-          //determine if the player is new, if so create them a data store and add to the store object
-          //otherwise make htem the selected player
-          var existingPlayer=false;
-          _.each(data.playerData, function(element, index, list) {
-            if(element.playerName==player) {
-              existingPlayer=true;
-              data.selectedPlayer=index;
-            }
-          });
-
 
         } else {
           alert('Sorry, your device doesnt appear to support local storage which sort of sux as it breask this app');
         }
-        console.log(data);
+      
+        if(doReset) {
+          window.location="index.html"
+        }
         return data;
       },
       gotoNextPlayer: function() {
