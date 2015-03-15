@@ -100,9 +100,8 @@
      var ScoreForm = React.createClass({
       handleSubmit: function(e) {
         e.preventDefault();
-        console.log(e);
-        console.log(this.refs);
-        var score = parseInt(this.refs.score.getDOMNode().value.trim());
+
+        var score = e.target.value;
 
         if(score >=0 && score <=5) {
           //pass to parent handler
@@ -110,9 +109,6 @@
         } else {
           alert('Bad score, must be between 0 and 5!')
         }
-
-        //this.refs.score.getDOMNode().value = "";
-        //this.refs.score.getDOMNode().focus();
         $(document.body).scrollTop($('#start').offset().top);
 
         
@@ -120,24 +116,19 @@
       render: function() {
 
         return (
-          <form  onSubmit={this.handleSubmit} >
+          <form  onSubmit={function(e) {e.preventDefault()}} >
             <div className="row" >
-                <div className="col-xs-6">Score for round {this.props.round}:<br />(from {this.props.fromPosition+'m'})</div>
-                  <div className="col-xs-4">
-                    <select ref="score" className="form-control input-xs">
-                      <option value="0">0</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
-                      <option value="5">5</option>
-                    </select>
-                  </div>
+                <div className="col-xs-12 text-center">Enter score for round {this.props.round} (from {this.props.fromPosition+'m'})<br /><br /></div>
             </div>
-            <div className="row" >
-            <div className="col-xs-6"></div>
-              <div className="col-xs-6">
-              <input type="submit" value="Save score"  className="btn btn-primary btn-md"/>  
+
+            <div className='row'>
+              <div className="text-center col-xs-12">
+                       <button type="button" className="btn btn-md btn-primary" onClick={this.handleSubmit} value="0" type="submit" >&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button>
+                { " " }<button type="button" className="btn btn-md btn-primary" onClick={this.handleSubmit} value="1" type="submit" >&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>
+                { " " }<button type="button" className="btn btn-md btn-primary" onClick={this.handleSubmit} value="2" type="submit" >&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>
+                { " " }<button type="button" className="btn btn-md btn-primary" onClick={this.handleSubmit} value="3" type="submit" >&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>
+                { " " }<button type="button" className="btn btn-md btn-primary" onClick={this.handleSubmit} value="4" type="submit" >&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>
+                { " " }<button type="button" className="btn btn-md btn-primary" onClick={this.handleSubmit} value="5" type="submit" >&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>
               </div>
             </div>
           </form>
