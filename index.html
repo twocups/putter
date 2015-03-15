@@ -36,12 +36,14 @@
               );
           });
 
+          var panelTitle="Round history for "+ this.props.playerName;
+
           return (
             <div className="row">
               <div className="col-xs-12 col-md-5">
                 <div className="panel panel-primary">
                   <div className="panel-heading">
-                    <h3 className="panel-title">History</h3>
+                    <h3 className="panel-title">{panelTitle}</h3>
                   </div>                  
                   <div className="panel-body" >
                       <table className="table table-striped">
@@ -98,6 +100,9 @@
 
     //Score submit form
      var ScoreForm = React.createClass({
+      gotoNextPlayer : function() {
+        this.props.gotoNextPlayer();
+      },
       handleSubmit: function(e) {
         e.preventDefault();
 
@@ -114,24 +119,30 @@
         
       },
       render: function() {
+        var nextPlayer=<div><div>&nbsp;</div>  
+              <div className="text-center">
+                 <button type="button" className="btn btn-info" onClick={this.gotoNextPlayer} value="0" type="submit" >Next player</button>
+              </div></div>
+        if(!this.props.showNextPlayer) {nextPlayer="";}
 
         return (
           <form  onSubmit={function(e) {e.preventDefault()}} >
             <div className="row" >
-                <div className="col-xs-12 text-center">Enter score for round {this.props.round} (from {this.props.fromPosition+'m'})<br /><br /></div>
+                <div className="col-xs-12 text-center">Enter score for <strong>{this.props.playerName}</strong> for round <strong>{this.props.round}</strong> (from {this.props.fromPosition+'m'})<br /><br /></div>
             </div>
               <div className="text-center">
                        <button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="0" type="submit" >&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button>
                 { " " }<button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="1" type="submit" >&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>
                 { " " }<button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="2" type="submit" >&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>
+                </div>
               <div>&nbsp;</div>  
                 <div className="text-center">
                        <button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="3" type="submit" >&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>
                 { " " }<button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="4" type="submit" >&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>
                 { " " }<button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="5" type="submit" >&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;</button>
                 </div>
+             {nextPlayer}
 
-              </div>
           </form>
         );
       }
@@ -193,13 +204,13 @@
                   </div>;
 
            }
-
+          var playerName=this.props.playerName;
           return (
             <div className="row">
               <div className="col-xs-12 col-md-5">
                 <div className="panel panel-primary">
                   <div className="panel-heading">
-                    <h3 className="panel-title">Game progress</h3>
+                    <h3 className="panel-title">{playerName}</h3>
                   </div>                  
                   <div className="panel-body" >
                       {gameScoreLine}
@@ -227,19 +238,38 @@
       handleReset : function() {
           this.props.handleScoreReset();
       },
+      handleDeletePlayer: function() {
+          this.props.handleDeletePlayer();
+      },
+      handleResetAll: function() {
+          this.props.handleScoreResetAll();
+      },
       render: function() {
-        var center={textAlign:"center"}
         return(
-          <div >
-         <div className="dropdown">
-          <button className="btn btn-danger dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" >
-            Reset scores
-            <span className="caret"></span>
-          </button>
-          <ul className="dropdown-menu" role="menu" >
-            <li onClick={this.handleReset} role="presentation"><a role="menuitem" tabindex="-1" href="#">Confirm, start again</a></li>
-          </ul>
-        </div>  
+          <div>
+            <div className="btn-group">
+                  <button className="btn btn-danger dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" >
+                    Reset scores&nbsp;
+                    <span className="caret"></span>
+                  </button>
+                  <ul className="dropdown-menu" role="menu" >
+                    <li onClick={this.handleReset} role="presentation"><a role="menuitem" tabindex="-1" href="#">Confirm, reset just this players scores</a></li>
+                    <li onClick={this.handleResetAll} role="presentation"><a role="menuitem" tabindex="-1" href="#">Confirm, reset <strong>ALL</strong> players scores</a></li>
+                  </ul>
+             </div> 
+     
+              { " " }<div className="btn-group">
+                  <button className="btn btn-danger dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" >
+                    Delete player&nbsp;
+                    <span className="caret"></span>
+                  </button>
+                  <ul className="dropdown-menu" role="menu" >
+                    <li onClick={this.handleDeletePlayer} role="presentation"><a role="menuitem" tabindex="-1" href="#">Confirm, delete this player</a></li>
+                  </ul>
+                </div>  
+   
+        
+
         </div>
 
        );
@@ -273,7 +303,68 @@
 
     });
 
+  
+   var PlayerListRow = React.createClass({
+      render: function(){
+        var playerLink="?player="+this.props.name;
+        var currentPlayerStyle={};
+        if(this.props.selected) {currentPlayerStyle={fontWeight:"bold"};}
 
+        return (
+            <tr>
+              <td><a style={currentPlayerStyle} href={playerLink}>{this.props.name}</a></td>
+              <td>{this.props.round}</td>
+              <td>{this.props.nextPosition + 'm'}</td>
+              <td>{this.props.points}</td>
+            </tr>
+          );       
+      }
+    }); 
+
+  var PlayerList = React.createClass({
+      handleAddPlayer: function() {
+        this.props.addNewPlayer();
+      },
+      render: function(){
+       
+        var currentPlayer=this.props.currentPlayer;
+        var rows = this.props.players.map(function (data,index) {
+          var accumulatedPoints=0;
+          data.history.map(function (data) {
+            accumulatedPoints=accumulatedPoints+data.points;
+          });
+
+
+
+          return (
+            <PlayerListRow selected={currentPlayer==index} name={data.playerName} round={data.currentRound-1} nextPosition={data.fromPosition} points={accumulatedPoints}/>
+            );
+        });
+        return (
+          <div className="row">
+            <div className="col-xs-12 col-md-5">
+              <div className="panel panel-primary">
+                <div className="panel-heading">
+                  <h3 className="panel-title">Players</h3>
+                </div>                  
+                <div className="panel-body" >
+                   <table className="table table-striped">
+                    <thead><td>Player</td><td>Played</td><td>Next</td><td>Points</td></thead>
+                    <tbody>
+                      {rows}
+                    </tbody>
+                  </table>
+                  <div className="text-center">
+                    <button className="btn btn-info" onClick={this.handleAddPlayer}>Add another player</button> 
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div> 
+          );       
+      }
+    }); 
 
 
     var Page = React.createClass({
@@ -281,34 +372,121 @@
 
         //load settings from local storage
         var data=false;
+        var returnData;
+
+        //get player from url
+        var player=getParameterByName('player');
+        if (player=="" || player == undefined) {player='Player 1'}
+       
 
         if(typeof(Storage)!=='undefined') {
           
+          //get pre-existing data store
           if(localStorage['scores']) {
             data=JSON.parse(localStorage['scores']);
           }
 
+          //first run, create a default the data storage object
           if(!data) {
-            var scores={currentRound: 1, fromPosition: 10, history: [] };
+            var scores={
+                totalRounds : 20,
+                selectedPlayer : 0,
+                playerData:[
+                    {
+                      playerName: player,
+                      currentRound: 1, fromPosition: 10, history: [] 
+                    }
+                ]
+           };
             localStorage['scores']=JSON.stringify(scores);
             data=scores;
           }
-        
-        } else {
-          alert('Sorry, your device doesnt appear to support local storage which sort of sux');
-        }
 
+          //determine if the player is new, if so create them a data store and add to the store object
+          //otherwise make htem the selected player
+          var existingPlayer=false;
+          _.each(data.playerData, function(element, index, list) {
+            if(element.playerName==player) {
+              existingPlayer=true;
+              data.selectedPlayer=index;
+            }
+          });
+
+          if(!existingPlayer) {
+            data.playerData.push({
+                      playerName: player,
+                      currentRound: 1, fromPosition: 10, history: [] 
+            });
+            data.selectedPlayer=data.playerData.length-1;
+            localStorage['scores']=JSON.stringify(data);
+          }
+
+        } else {
+          alert('Sorry, your device doesnt appear to support local storage which sort of sux as it breask this app');
+        }
+        console.log(data);
         return data;
       },
+      gotoNextPlayer: function() {
+        //count the players we have already and then link the next one.
+        var numPlayers=this.state.playerData.length;
+        var nextPlayer=this.state.selectedPlayer+1;
+        if(nextPlayer > (numPlayers-1) ) {nextPlayer=0;}
+        var newPlayerName=this.state.playerData[nextPlayer].playerName;
+        window.location.href="?player="+newPlayerName;
+      },
+      addNewPlayer: function() {
+        //count the players we have already and then link to a new one.
+        var newPlayer="Player " + (this.state.playerData.length+1);
+        window.location.href="?player="+newPlayer;
+      },
+      handlePlayerSettignsSubmit: function(){
+        console.log('player settings changed');
+      },
       handleScoreReset: function() {
-        var scores={currentRound: 1, fromPosition: 10, history: [] };
-        localStorage['scores']=JSON.stringify(scores);
-        this.setState(scores);
+        var playerState=this.state.playerData[this.state.selectedPlayer];
+        var resetScores={playerName: playerState.playerName, currentRound: 1, fromPosition: 10, history: [] };
+        var newState=this.state;
+        newState.playerData[this.state.selectedPlayer]=resetScores;
+        localStorage['scores']=JSON.stringify(newState);
+        this.setState(newState);
+        alert('Scores have been reset for this player');
+      },
+      handleScoreResetAll: function() {
+
+        var newState=this.state;
+        this.state.playerData.map(function(data,index){
+          var playerState=data;
+          var resetScores={playerName: playerState.playerName, currentRound: 1, fromPosition: 10, history: [] };
+          newState.playerData[index]=resetScores;
+        });
+        
+        localStorage['scores']=JSON.stringify(newState);
+        this.setState(newState);
+        alert('Scores have been reset for ALL players');
+      },
+      handleDeletePlayer: function() {
+        var deletePlayerName=this.state.playerData[this.state.selectedPlayer].playerName;
+        var numPlayers=this.state.playerData.length;
+        var nextPlayer=this.state.selectedPlayer+1;
+        if(nextPlayer > (numPlayers-1) ) {nextPlayer=0;}
+        var newPlayerName=this.state.playerData[nextPlayer].playerName;
+
+        //deal with deleting last player
+        if(numPlayers < 2) {nextPlayer=0; newPlayerName="Player 1"}
+        
+
+        var newState=this.state;
+        newState.playerData.splice(this.state.selectedPlayer, 1);
+        localStorage['scores']=JSON.stringify(newState);
+
+        window.location.href="?player="+newPlayerName;
+        alert(deletePlayerName+' has been deleted');
       },
       handleScoreSubmit: function(score) {
-       
+        var playerState=this.state.playerData[this.state.selectedPlayer];
         var score=score.score;
-        var nextRound=this.state.currentRound +1;
+        var nextRound=playerState.currentRound +1;
         var nextStartPosition=10;
 
               switch(score) {
@@ -336,15 +514,18 @@
               }
 
           var historicScore = {
-            round : this.state.currentRound,
+            round : playerState.currentRound,
             score : score,
-            points : this.state.fromPosition*score, //same as points
-            fromPosition : this.state.fromPosition
+            points : playerState.fromPosition*score, //same as points
+            fromPosition : playerState.fromPosition
           };
 
-          var historicScores=this.state.history;
+
+          var historicScores=playerState.history;
           historicScores.push(historicScore);
-          var newState={currentRound: nextRound, fromPosition: nextStartPosition, history: historicScores};
+          var newState=this.state;
+          newState.playerData[this.state.selectedPlayer]={playerName:playerState.playerName, currentRound: nextRound, fromPosition: nextStartPosition, history: historicScores};
+
           this.setState(newState);
           localStorage['scores']=JSON.stringify(newState);
         
@@ -353,24 +534,28 @@
 
       render: function() { 
 
+        var playerState=this.state.playerData[this.state.selectedPlayer];
+
         //calculate points!
         var accumulatedPoints=0;
-        this.state.history.map(function (data) {
+        playerState.history.map(function (data) {
           accumulatedPoints=accumulatedPoints+data.points;
         });
 
         var scorePanel="";
-        if(this.state.currentRound <= globalData.totalRounds) {
-            scorePanel= <ScorePanel><ScoreForm round={this.state.currentRound} fromPosition={this.state.fromPosition} handleScoreSubmit={this.handleScoreSubmit}/></ScorePanel>;
+        if(playerState.currentRound <= this.state.totalRounds) {
+            scorePanel= <ScorePanel><ScoreForm showNextPlayer={this.state.playerData.length > 1} gotoNextPlayer={this.gotoNextPlayer} playerName={playerState.playerName}  round={playerState.currentRound} fromPosition={playerState.fromPosition} handleScoreSubmit={this.handleScoreSubmit}/></ScorePanel>;
         }
         return (
           <div >
             <h1 id="start">Putting game scorer</h1><br />  
-            <StatsPanel round={this.state.currentRound} fromPosition={this.state.fromPosition} totalPoints={accumulatedPoints}/>
+            <StatsPanel playerName={playerState.playerName} round={playerState.currentRound} fromPosition={playerState.fromPosition} totalPoints={accumulatedPoints}/>
             {scorePanel}
-            <HistoryPanel history={this.state.history} />
-            <ResetPanel handleScoreReset={this.handleScoreReset} />
-            <CDGCPanel />
+            <HistoryPanel playerName={playerState.playerName}  history={playerState.history} />
+            <PlayerList players={this.state.playerData} currentPlayer={this.state.selectedPlayer} addNewPlayer={this.addNewPlayer} />
+            <ResetPanel handleScoreResetAll={this.handleScoreResetAll} handleDeletePlayer={this.handleDeletePlayer} handleScoreReset={this.handleScoreReset} />
+            <br /><br /><CDGCPanel />
+
           </div>
         );
       }
@@ -381,6 +566,17 @@
         <Page  />,
         document.getElementById('content')
       );
+
+      /*------------------ utils  */
+
+
+      function getParameterByName(name) {
+          name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+          var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+              results = regex.exec(location.search);
+          return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+      }
+
 
     </script>
     <script src="bootstrap/js/bootstrap.js"> </script>
