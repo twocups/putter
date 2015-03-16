@@ -20,10 +20,6 @@
       james@5point6.net on behalf of the disc golf community 
     */
 
-    var globalData = {
-      totalRounds : 20 //total number of rounds to play
-    };
-
       //History row
       var HistoryPanel = React.createClass({
         handleDeleteLastResult: function() {
@@ -111,7 +107,69 @@
       });
 
 
+      var GameHistory = React.createClass({
+        render: function() {
 
+            var rows = this.props.history.map(function (data) {
+      
+            var datemsec=Date.parse(data.date);
+            var theDate=new Date(datemsec);
+            var date=theDate.getDate() + '/' + (theDate.getMonth()+1 + '/' + theDate.getFullYear());
+          /*
+            return (
+              <GameHistoryRow 
+                date={date} 
+                five= {Math.round((data.scores['5'].scored / (data.scores['5'].numThrows+0.00001)) *100) } 
+                six=  {Math.round((data.scores['6'].scored / (data.scores['6'].numThrows+0.00001)) *100)} 
+                seven={Math.round((data.scores['7'].scored / (data.scores['7'].numThrows+0.00001)) *100)} 
+                eight={Math.round((data.scores['8'].scored / (data.scores['8'].numThrows+0.00001)) *100)} 
+                nine= {Math.round((data.scores['9'].scored / (data.scores['9'].numThrows+0.00001)) *100)} 
+                ten=  {Math.round((data.scores['10'].scored / (data.scores['10'].numThrows+0.00001)) *100)} 
+                totalPoints={data.scores['total'].scored} 
+                totalPercent={Math.round((data.scores['total'].scored  / (data.scores['total'].numThrows+0.00001)) *100)} />
+              );
+          */
+            return (
+              <GameHistoryRow 
+                date={date} 
+                totalPoints={data.scores['total'].points} 
+                totalPercent={Math.round((data.scores['total'].scored  / (data.scores['total'].numThrows+0.00001)) *100)} />
+              );
+
+          });
+
+//var rows="";
+          return (
+            <div>
+                  <table className="table table-striped">
+                    <thead>
+                      <th>Date</th>
+                      <th>Percent</th>
+                      <th>Points</th>
+                    </thead>
+                    <tbody>
+                      {rows}
+                    </tbody>
+                  </table>
+            </div>
+          );
+        }
+      });
+
+      var GameHistoryRow = React.createClass({
+        render: function() {
+          return (
+            <tr>
+              <td>{this.props.date}</td>
+              <td>{this.props.totalPercent}%</td>
+              <td>{this.props.totalPoints}</td>
+        
+            </tr>
+      
+
+          );
+        }
+      });
       
       var RoundGraphs = React.createClass({
         render: function() {
@@ -552,12 +610,12 @@
           //first run, create a default the data storage object
           if(!data) {
             var scores={
-                totalRounds : 20,
+                totalRounds : 3,
                 selectedPlayer : 0,
                 playerData:[
                     {
                       playerName: "Player 1",
-                      currentRound: 1, fromPosition: 10, history: [] 
+                      currentRound: 1, fromPosition: 10, history: [], gameHistory: []
                     }
                 ]
            };
@@ -595,7 +653,7 @@
 
         newState.playerData.push({
                 playerName: newPlayer,
-                currentRound: 1, fromPosition: 10, history: [] 
+                currentRound: 1, fromPosition: 10, history: [], gameHistory: []
         });
         newState.selectedPlayer=newState.playerData.length-1;
 
@@ -617,7 +675,7 @@
       },
       handleScoreReset: function() {
         var playerState=this.state.playerData[this.state.selectedPlayer];
-        var resetScores={playerName: playerState.playerName, currentRound: 1, fromPosition: 10, history: [] };
+        var resetScores={playerName: playerState.playerName, currentRound: 1, fromPosition: 10, history: [], gameHistory: playerState.gameHistory };
         var newState=this.state;
         newState.playerData[this.state.selectedPlayer]=resetScores;
         localStorage['scores']=JSON.stringify(newState);
@@ -629,7 +687,7 @@
         var newState=this.state;
         this.state.playerData.map(function(data,index){
           var playerState=data;
-          var resetScores={playerName: playerState.playerName, currentRound: 1, fromPosition: 10, history: [] };
+          var resetScores={playerName: playerState.playerName, currentRound: 1, fromPosition: 10, history: [], gameHistory: playerState.gameHistory };
           newState.playerData[index]=resetScores;
         });
         
@@ -713,8 +771,52 @@
 
           var historicScores=playerState.history;
           historicScores.push(historicScore);
+
+          var gameScoreHistory=playerState.gameHistory;
+          if(gameScoreHistory==undefined) {gameScoreHistory=[];}
+
+          //store game history
+          if(playerState.currentRound >= this.state.totalRounds) {
+            var dateTime=new Date();
+            var gameSummary={
+              date: dateTime,
+              scores: {
+                  "5" : {scored: 0, numThrows: 0, points: 0, percent: 0},
+                  "6" : {scored: 0, numThrows: 0, points: 0, percent: 0},
+                  "7" : {scored: 0, numThrows: 0, points: 0, percent: 0},
+                  "8" : {scored: 0, numThrows: 0, points: 0, percent: 0},
+                  "9" : {scored: 0, numThrows: 0, points: 0, percent: 0},
+                  "10" : {scored: 0, numThrows: 0, points: 0, percent: 0},
+                  "total":  {scored: 0, numThrows: 0, points: 0, percent: 0}
+              }
+            };
+
+          var throwsPerTurn=5;
+          var numThrows=playerState.history.length*throwsPerTurn;
+          var totalPoints=0;
+          
+
+          playerState.history.map(function (data) {
+            gameSummary.scores[data.fromPosition].scored=parseInt(gameSummary.scores[data.fromPosition].scored)+parseInt(data.score);
+            gameSummary.scores[data.fromPosition].numThrows=parseInt(gameSummary.scores[data.fromPosition].numThrows)+throwsPerTurn;
+            gameSummary.scores[data.fromPosition].points=parseInt(gameSummary.scores[data.fromPosition].points)+parseInt(data.points);
+
+
+            gameSummary.scores['total'].scored=parseInt(gameSummary.scores['total'].scored)+parseInt(data.score);
+            gameSummary.scores['total'].numThrows=parseInt(gameSummary.scores['total'].numThrows)+throwsPerTurn;
+            gameSummary.scores['total'].points=parseInt(gameSummary.scores['total'].points)+parseInt(data.points);
+
+
+          });  
+          gameScoreHistory.push(gameSummary);
+          }
+
+
+
           var newState=this.state;
-          newState.playerData[this.state.selectedPlayer]={playerName:playerState.playerName, currentRound: nextRound, fromPosition: nextStartPosition, history: historicScores};
+          newState.playerData[this.state.selectedPlayer]={playerName:playerState.playerName, currentRound: nextRound, fromPosition: nextStartPosition, history: historicScores, gameHistory: gameScoreHistory};
+
+
 
           this.setState(newState);
           localStorage['scores']=JSON.stringify(newState);
@@ -736,7 +838,7 @@
 
         var scorePanel=<BasicPanel title="Round score"><ScoreForm showScoreButtons={playerState.currentRound <= this.state.totalRounds} showNextPlayer={this.state.playerData.length > 1} gotoNextPlayer={this.gotoNextPlayer} playerName={playerState.playerName}  round={playerState.currentRound} fromPosition={playerState.fromPosition} handleScoreSubmit={this.handleScoreSubmit}/></BasicPanel>;
         
-
+        
 
         return (
           <div >
@@ -747,6 +849,8 @@
               <RoundGraphs roundData={playerState.history}/>
             </BasicPanel>
             <HistoryPanel handleDeleteLastResult={this.handleDeleteLastResult} playerName={playerState.playerName}  history={playerState.history} />
+            <BasicPanel title="Player game record"><GameHistory history={playerState.gameHistory}/></BasicPanel>
+
             <BasicPanel title="Player settings"><PlayerSettingsForm handlePlayerSettings={this.handlePlayerSettings}playerName={playerState.playerName} /></BasicPanel>
 
             <PlayerList handlePlayerLink={this.handlePlayerLink} players={this.state.playerData} currentPlayer={this.state.selectedPlayer} addNewPlayer={this.addNewPlayer} />
