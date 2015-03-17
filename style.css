@@ -8,6 +8,8 @@
 .voffset7 { margin-top: 80px; }
 .voffset8 { margin-top: 100px; }
 .voffset9 { margin-top: 150px; }
+.appHeadline {padding-left: 20px; padding-bottom: 1em;}
+.appHeadline h1 {font-size:2.2em;}
 @media screen and (-webkit-min-device-pixel-ratio:0) { 
   select:focus,
   textarea:focus,
