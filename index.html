@@ -34,13 +34,13 @@ var GameHistoryRow = React.createClass({
           e.preventDefault();
           this.setState({hiddenRow: !this.state.hiddenRow});
           var message="Stats for game:\n";
-          message+="\n5m   : " + this.props.five +"%";
-          message+="\n6m   : " + this.props.six +"%";
-          message+="\n7m   : " + this.props.seven +"%";
-          message+="\n8m   : " + this.props.eight +"%";
-          message+="\n9m   : " + this.props.nine +"%";
-          message+="\n10m  : " + this.props.ten +"%";
-          message+="\nTotal: " + this.props.totalPercent +"%";
+          message+="\n5m   : "; if(this.props.five==null) { message+="n/a" } else { message+= this.props.five +"%"};
+          message+="\n6m   : "; if(this.props.six ==null) { message+="n/a" } else { message+= this.props.six +"%"};
+          message+="\n7m   : "; if(this.props.seven==null) { message+="n/a" } else { message+= this.props.seven +"%"};
+          message+="\n8m   : "; if(this.props.eight==null) { message+="n/a" } else { message+= this.props.eight +"%"};
+          message+="\n9m   : "; if(this.props.nine ==null) { message+="n/a" } else { message+= this.props.nine +"%"};
+          message+="\n10m  : "; if(this.props.ten ==null) { message+="n/a" } else { message+= this.props.ten +"%"};
+          message+="\nTotal: "; if(this.props.totalPercent==null) { message+="n/a" } else { message+= this.props.totalPercent +"%"};
           alert(message);
         },
         deleteGame: function(e) {
@@ -192,14 +192,14 @@ var GameHistoryRow = React.createClass({
                   deleteGameHandler={deleteGameHandler} 
                   gameIndex={index+truncateStart} 
                   date={date} 
-                  five= {Math.round((data.scores['5'].scored / (data.scores['5'].numThrows+0.00001)) *100) } 
-                  six=  {Math.round((data.scores['6'].scored / (data.scores['6'].numThrows+0.00001)) *100)} 
-                  seven={Math.round((data.scores['7'].scored / (data.scores['7'].numThrows+0.00001)) *100)} 
-                  eight={Math.round((data.scores['8'].scored / (data.scores['8'].numThrows+0.00001)) *100)} 
-                  nine= {Math.round((data.scores['9'].scored / (data.scores['9'].numThrows+0.00001)) *100)} 
-                  ten=  {Math.round((data.scores['10'].scored / (data.scores['10'].numThrows+0.00001)) *100)} 
+                  five= {data.scores['5'].percent } 
+                  six=  {data.scores['6'].percent } 
+                  seven={data.scores['7'].percent } 
+                  eight={data.scores['8'].percent } 
+                  nine= {data.scores['9'].percent } 
+                  ten=  {data.scores['10'].percent} 
                   totalPoints={data.scores['total'].points} 
-                  totalPercent={Math.round((data.scores['total'].scored  / (data.scores['total'].numThrows+0.00001)) *100)} />
+                  totalPercent={data.scores['total'].percent} />
                 );
             
             /*
@@ -236,24 +236,98 @@ var GameHistoryRow = React.createClass({
           var totalScore=0;
 
 
-          //calc last 3 average
+          //calc last 3 average for total score and percentages
           var recent=this.props.history;
           var startIndex=recent.length-3;
+
           if(startIndex < 0) {startIndex=0;}
           _.each(_.rest(recent,startIndex),function(data){
             totalScore=totalScore+data.scores.total.points;
           });
-    
+
+          var percents={
+              "5" : {percent: 0, qty: 0, avg: null},
+              "6" : {percent: 0, qty: 0, avg: null},
+              "7" : {percent: 0, qty: 0, avg: null},
+              "8" : {percent: 0, qty: 0, avg: null},
+              "9" : {percent: 0, qty: 0, avg: null},
+              "10" : {percent: 0, qty: 0, avg: null},
+              "total" : {percent: 0, qty: 0, avg: null}
+          };
+
+
+
           var divider=3;
           if(this.props.history.length <3 ) {divider=this.props.history.length ;}
+        
           var totalAverage=0;
-          if(divider>0) {totalAverage=Math.round(totalScore/divider); }
-          
+          if(divider>0) {
+            //nothing
+          } else {
+            divider=1;
+          }
+          totalAverage=Math.round(totalScore/divider); 
+          console.log(totalScore);
+
+          //so the problem here is that if there were no throws for a position then it should reduce the average...
+          if(startIndex < 0) {startIndex=0;}
+          _.each(_.rest(recent,startIndex),function(data){
+
+            totalScore=totalScore+data.scores.total.points;
+            percents['5'].percent=percents['5'].percent+data.scores['5'].percent;          if(data.scores['5'].numThrows > 0) {percents['5'].qty++;}
+            percents['6'].percent=percents['6'].percent+data.scores['6'].percent;          if(data.scores['6'].numThrows > 0) {percents['6'].qty++;}
+            percents['7'].percent=percents['7'].percent+data.scores['7'].percent;          if(data.scores['7'].numThrows > 0) {percents['7'].qty++;}
+            percents['8'].percent=percents['8'].percent+data.scores['8'].percent;          if(data.scores['8'].numThrows > 0) {percents['8'].qty++;}
+            percents['9'].percent=percents['9'].percent+data.scores['9'].percent;          if(data.scores['9'].numThrows > 0) {percents['9'].qty++;}
+            percents['10'].percent=percents['10'].percent+data.scores['10'].percent;       if(data.scores['10'].numThrows > 0) {percents['10'].qty++;}
+            percents['total'].percent=percents['total'].percent+data.scores.total.percent; if(data.scores['total'].numThrows > 0) {percents['total'].qty++;}
+
+          });          
+
+       
 
           var bestScore=0;
           _.each(this.props.history,function(data){
             if(data.scores.total.points > bestScore) {bestScore=data.scores.total.points};
           });
+
+          console.log(percents);
+          //divide by 0 errors kludge
+          if(percents['5'].qty == 0) {percents['5'].avg="n/a";        }else {percents['5'].avg=Math.round(percents['5'].percent / percents['5'].qty)+"%"};
+          if(percents['6'].qty == 0) {percents['6'].avg="n/a";        }else {percents['6'].avg=Math.round(percents['6'].percent / percents['6'].qty)+"%"};
+          if(percents['7'].qty == 0) {percents['7'].avg="n/a";        }else {percents['7'].avg=Math.round(percents['7'].percent / percents['7'].qty)+"%"};
+          if(percents['8'].qty == 0) {percents['8'].avg="n/a";        }else {percents['8'].avg=Math.round(percents['8'].percent / percents['8'].qty)+"%"};
+          if(percents['9'].qty == 0) {percents['9'].avg="n/a";        }else {percents['9'].avg=Math.round(percents['9'].percent / percents['9'].qty)+"%"};
+          if(percents['10'].qty == 0) {percents['10'].avg="n/a";      }else {percents['10'].avg=Math.round(percents['10'].percent / percents['10'].qty)+"%"};
+          if(percents['total'].qty == 0) {percents['total'].avg="n/a";}else {percents['total'].avg=Math.round(percents['total'].percent / percents['total'].qty)+"%"};
+
+          var percentPanel=<div className="row">
+          <p className="text-center">Putt success (previous 3)</p>
+            <table className="table table-striped">
+              <thead>
+                <tr className="veryNarrowCells">
+                  <th>5m</th>
+                  <th>6m</th>
+                  <th>7m</th>
+                  <th>8m</th>
+                  <th>9m</th>
+                  <th>10m</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="veryNarrowCells">
+                  <td>{percents['5'].avg}</td>
+                  <td>{percents['6'].avg}</td>
+                  <td>{percents['7'].avg}</td>
+                  <td>{percents['8'].avg}</td>
+                  <td>{percents['9'].avg}</td>
+                  <td>{percents['10'].avg}</td>
+                  <td>{percents['total'].avg}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>;
 
           var summaryPanel=<div>
                   <div  className="well" >
@@ -262,7 +336,7 @@ var GameHistoryRow = React.createClass({
                         Rounds<br />Played
                       </div>
                       <div className="col-xs-4 text-center">
-                        Average<br />Last 3
+                        Av. Score<br />Previous 3
                       </div>
                       <div className="col-xs-4 text-center">
                         Best<br/>Score
@@ -279,10 +353,15 @@ var GameHistoryRow = React.createClass({
                         <p style={numberStyle} >{bestScore}</p>
                       </div>
                     </div>
+                    {percentPanel}
                   </div>
                    
                   </div>;
 
+
+
+
+          
            
 
 
@@ -753,7 +832,7 @@ var GameHistoryRow = React.createClass({
               </a>
               <p className="text-center">Croydon Disc Golf Club</p>
               <p className="text-center">London{"\'"}s only fully basketed disc golf course </p>
-              <p className="text-center"><em>v1.0 Super beta!</em></p>
+              <p className="text-center"><em>v1.1 Super beta!</em></p>
             </div>
           </div>
           </div>
@@ -857,7 +936,7 @@ var GameHistoryRow = React.createClass({
           //first run, create a default the data storage object
           if(!data) {
             var scores={
-                totalRounds : 20,
+                totalRounds : 3,
                 selectedPlayer : 0,
                 playerData:[
                     {
@@ -986,7 +1065,15 @@ var GameHistoryRow = React.createClass({
        newState.playerData[this.state.selectedPlayer].playerName=playerSettings.playerName;
        this.setState(newState);
        localStorage['scores']=JSON.stringify(newState);
-      },    
+      },
+      calculatePercentage: function(numThrows, scored) {
+        if(numThrows < 1 ) {
+          return null;
+        } else {
+          return Math.round((scored/numThrows)*100);
+        }
+
+      },   
       handleScoreSubmit: function(score) {
         var playerState=this.state.playerData[this.state.selectedPlayer];
         var score=score.score;
@@ -1044,7 +1131,8 @@ var GameHistoryRow = React.createClass({
                   "9" : {scored: 0, numThrows: 0, points: 0, percent: 0},
                   "10" : {scored: 0, numThrows: 0, points: 0, percent: 0},
                   "total":  {scored: 0, numThrows: 0, points: 0, percent: 0}
-              }
+              },
+              roundHistory: []
             };
 
           var throwsPerTurn=5;
@@ -1057,14 +1145,22 @@ var GameHistoryRow = React.createClass({
             gameSummary.scores[data.fromPosition].numThrows=parseInt(gameSummary.scores[data.fromPosition].numThrows)+throwsPerTurn;
             gameSummary.scores[data.fromPosition].points=parseInt(gameSummary.scores[data.fromPosition].points)+parseInt(data.points);
 
-
             gameSummary.scores['total'].scored=parseInt(gameSummary.scores['total'].scored)+parseInt(data.score);
             gameSummary.scores['total'].numThrows=parseInt(gameSummary.scores['total'].numThrows)+throwsPerTurn;
             gameSummary.scores['total'].points=parseInt(gameSummary.scores['total'].points)+parseInt(data.points);
-
+           
 
           });  
-          gameScoreHistory.push(gameSummary);
+
+            gameSummary.scores['total'].percent=this.calculatePercentage(gameSummary.scores['total'].numThrows,gameSummary.scores['total'].scored)
+            gameSummary.scores['5'].percent=this.calculatePercentage(gameSummary.scores['5'].numThrows,gameSummary.scores['5'].scored)
+            gameSummary.scores['6'].percent=this.calculatePercentage(gameSummary.scores['6'].numThrows,gameSummary.scores['6'].scored)
+            gameSummary.scores['7'].percent=this.calculatePercentage(gameSummary.scores['7'].numThrows,gameSummary.scores['7'].scored)
+            gameSummary.scores['8'].percent=this.calculatePercentage(gameSummary.scores['8'].numThrows,gameSummary.scores['8'].scored)
+            gameSummary.scores['9'].percent=this.calculatePercentage(gameSummary.scores['9'].numThrows,gameSummary.scores['9'].scored)
+            gameSummary.scores['10'].percent=this.calculatePercentage(gameSummary.scores['10'].numThrows,gameSummary.scores['10'].scored)
+            gameSummary.roundHistory=historicScores; //full scores store in case required? possibly overkill
+            gameScoreHistory.push(gameSummary);
           }
 
 
