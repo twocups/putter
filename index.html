@@ -16,8 +16,12 @@
       
 
     <div id="content" >
-      Loading... please wait<br /><br />
-      If nothing happens after a while and you <strong>definitely</strong> have network connection then you can reset the app by clicking <a href="?reset=true">here</a>. <br /><strong>This will destroy all your data! :(</strong>
+      <p>
+      Loading... please wait
+      </p>
+      <br /><br />
+      <p>
+      If nothing happens after a while and you <strong>definitely</strong> have network connection then you can reset the app by clicking <a href="?reset=true">here</a>. <br /><br /><strong>This will destroy all your data! :(</strong></p>p>
     </div>
     <script type="text/jsx">
 
@@ -128,7 +132,6 @@ var GameHistoryRow = React.createClass({
         render: function() {
           return (
               <div>
-                <canvas id="myChart" />
                 <p>The putting game is intended to help improve your putting. It consists of 20 rounds of five putts from varying distances. You score points for each putt, scoring more for putts from further away.</p>
                 <p>
                 To prepare for the game mark six positions at 5m, 6m, 7m , 8m, 9m and 10m from the basket. These are your putting positions. You need 5 discs in total.
@@ -153,7 +156,7 @@ var GameHistoryRow = React.createClass({
                 <h4>Credits</h4>
                 This app was created for the disc golf community by James Buchanan (<a target="_blank" href="http://www.twitter.com/twocups">@twocups</a>) from <a target="_blank"  href="http://www.croydondiscgolf.com">Croydon Disc Golf Club</a>, London, UK.
                 </p>
-                <p>Thumbs up and thanks to JYLY (Markus Lindqvist) who came up with the idea and scoring system for the actual training game itself.</p>
+                <p>Thanks to JYLY (Markus Lindqvist) who came up with the idea and scoring system for the actual training game itself.</p>
               </div>
             );
         }
