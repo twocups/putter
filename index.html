@@ -243,8 +243,8 @@ var GameHistoryRow = React.createClass({
           }
 
           //sumayr panel
-          var numberStyle={fontSize: "40px", fontWeight: "bold"};
-          var numberUnitStyle={fontSize: "20px", fontWeight: "bold"};
+          var numberStyle={fontSize: "36px", fontWeight: "bold"};
+          var numberUnitStyle={fontSize: "18px", fontWeight: "bold"};
           var totalScore=0;
 
 
@@ -279,7 +279,7 @@ var GameHistoryRow = React.createClass({
             divider=1;
           }
           totalAverage=Math.round(totalScore/divider); 
-          console.log(totalScore);
+          
 
           //so the problem here is that if there were no throws for a position then it should reduce the average...
           if(startIndex < 0) {startIndex=0;}
@@ -303,7 +303,7 @@ var GameHistoryRow = React.createClass({
             if(data.scores.total.points > bestScore) {bestScore=data.scores.total.points};
           });
 
-          console.log(percents);
+          
           //divide by 0 errors kludge
           if(percents['5'].qty == 0) {percents['5'].avg="n/a";        }else {percents['5'].avg=Math.round(percents['5'].percent / percents['5'].qty)+"%"};
           if(percents['6'].qty == 0) {percents['6'].avg="n/a";        }else {percents['6'].avg=Math.round(percents['6'].percent / percents['6'].qty)+"%"};
@@ -314,7 +314,7 @@ var GameHistoryRow = React.createClass({
           if(percents['total'].qty == 0) {percents['total'].avg="n/a";}else {percents['total'].avg=Math.round(percents['total'].percent / percents['total'].qty)+"%"};
 
           var percentPanel=<div className="row">
-          <p className="text-center">Putt success (previous 5)</p>
+          <p className="text-center"><br />Putt success (previous 5)</p>
             <table className="table table-striped">
               <thead>
                 <tr className="veryNarrowCells">
@@ -324,7 +324,6 @@ var GameHistoryRow = React.createClass({
                   <th>8m</th>
                   <th>9m</th>
                   <th>10m</th>
-                  <th>Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -335,10 +334,11 @@ var GameHistoryRow = React.createClass({
                   <td>{percents['8'].avg}</td>
                   <td>{percents['9'].avg}</td>
                   <td>{percents['10'].avg}</td>
-                  <td>{percents['total'].avg}</td>
+                  
                 </tr>
               </tbody>
             </table>
+            <div className="text-center"><strong>Total: </strong>{percents['total'].avg}</div>
           </div>;
 
           var summaryPanel=<div>
@@ -348,7 +348,7 @@ var GameHistoryRow = React.createClass({
                         Rounds<br />Played
                       </div>
                       <div className="col-xs-4 text-center">
-                        Av. Score<br />Previous 5
+                        Av. Score
                       </div>
                       <div className="col-xs-4 text-center">
                         Best<br/>Score
@@ -647,15 +647,13 @@ var GameHistoryRow = React.createClass({
 
         if(this.props.showScoreButtons) {
             scoreButtons=<div>
-              <div className="row" >
-                <div className="col-xs-12 text-center">Enter score for <strong>{this.props.playerName}</strong> for round <strong>{this.props.round}</strong> (from {this.props.fromPosition+'m'})<br /><br /></div>
-            </div>
-              <div className="text-center">
+
+              <div className="text-center topbuttonrow">
                        <button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="0" type="submit" >&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;</button>
                 { " " }<button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="1" type="submit" >&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</button>
                 { " " }<button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="2" type="submit" >&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</button>
                 </div>
-              <div>&nbsp;</div>  
+              
                 <div className="text-center">
                        <button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="3" type="submit" >&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</button>
                 { " " }<button type="button" className="btn btn-lg btn-primary" onClick={this.handleSubmit} value="4" type="submit" >&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;</button>
@@ -702,8 +700,8 @@ var GameHistoryRow = React.createClass({
       //Stats panel
       var StatsPanel = React.createClass({
         render: function() {
-          var numberStyle={fontSize: "40px", fontWeight: "bold"};
-          var numberUnitStyle={fontSize: "20px", fontWeight: "bold"};
+          var numberStyle={fontSize: "36px", fontWeight: "bold"};
+          var numberUnitStyle={fontSize: "16px", fontWeight: "bold"};
           var progress=Math.floor(((this.props.round-1)/this.props.totalRounds) * 100) +"%";
           var progressText=progress//this.props.round+" / "+this.props.totalRounds;
 
@@ -711,7 +709,7 @@ var GameHistoryRow = React.createClass({
 
           if(this.props.round > this.props.totalRounds) {
                 gameScoreLine=<div>
-                <div  className="well" >
+                <div  className="well wellsmaller" >
                   <div className="row">
                         <div className="col-xs-12 text-center">
                           <p style={numberStyle}>Total  {this.props.totalPoints}</p>
@@ -720,6 +718,7 @@ var GameHistoryRow = React.createClass({
                   </div>
                 </div>
                 <ProgressBar progress={progress} progressText={progressText} />
+                {this.props.children}
                 </div>
                 ;
 
@@ -727,7 +726,7 @@ var GameHistoryRow = React.createClass({
           } else {
 
              gameScoreLine=<div>
-                  <div  className="well" >
+                  <div  className="well wellsmaller" >
                   <div className="row">
                       <div className="col-xs-4 text-center">
                         Round
@@ -752,6 +751,7 @@ var GameHistoryRow = React.createClass({
                     </div>
                   </div>
                     <ProgressBar progress={progress} progressText={progressText}/>
+                    {this.props.children}
                   </div>;
 
            }
@@ -778,7 +778,7 @@ var GameHistoryRow = React.createClass({
         var progressStyle={width: this.props.progress};
         return(
         <div className="progress">
-          <div className="progress-bar progress-bar-striped" role="progressbar"  style={progressStyle}>{this.props.progressText}</div>
+          <div className="progress-bar progress-bar-striped progressbarshort" role="progressbar"  style={progressStyle}>{this.props.progressText}</div>
         </div>);
       }
 
@@ -1200,7 +1200,7 @@ var GameHistoryRow = React.createClass({
         });
        }
 
-        var scorePanel=<BasicPanel title="Round score"><ScoreForm handleScoreReset={this.handleScoreReset} showScoreButtons={playerState.currentRound <= this.state.totalRounds} showNextPlayer={this.state.playerData.length > 1} gotoNextPlayer={this.gotoNextPlayer} playerName={playerState.playerName}  round={playerState.currentRound} fromPosition={playerState.fromPosition} handleScoreSubmit={this.handleScoreSubmit}/></BasicPanel>;
+        var scorePanel=<ScoreForm handleScoreReset={this.handleScoreReset} showScoreButtons={playerState.currentRound <= this.state.totalRounds} showNextPlayer={this.state.playerData.length > 1} gotoNextPlayer={this.gotoNextPlayer} playerName={playerState.playerName}  round={playerState.currentRound} fromPosition={playerState.fromPosition} handleScoreSubmit={this.handleScoreSubmit}/>;
         
         
 
@@ -1209,10 +1209,11 @@ var GameHistoryRow = React.createClass({
           
           <div id="start" className="container">
           <div className="appHeadline">
-              <h1>Puttz!  <small>A putting practice scorer</small></h1>
+              <h1>Puttz!  <small>Practice scorecard</small></h1>
           </div>
-            <StatsPanel totalRounds={this.state.totalRounds} playerName={playerState.playerName} round={playerState.currentRound} fromPosition={playerState.fromPosition} totalPoints={accumulatedPoints}/>
-            {scorePanel}
+            <StatsPanel totalRounds={this.state.totalRounds} playerName={playerState.playerName} round={playerState.currentRound} fromPosition={playerState.fromPosition} totalPoints={accumulatedPoints}>
+              {scorePanel}
+            </StatsPanel>
             <div id="pageScoreCard" />
              <BasicPanel title="Statistics">
               <RoundGraphs roundData={playerState.history}/>

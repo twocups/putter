@@ -11,6 +11,9 @@
 .appHeadline {padding-left: 20px; padding-bottom: 1em;}
 .appHeadline h1 {font-size:2.2em;}
 .veryNarrowCells td, .veryNarrowCells th { text-align:center; padding: 8px 3px 8px 3px !important;}
+.wellsmaller {padding:10px; margin-bottom:10px;}
+.topbuttonrow {margin-bottom:10px;}
+.progressbarshort {margin-bottom:10px;}
 @media screen and (-webkit-min-device-pixel-ratio:0) { 
   select:focus,
   textarea:focus,
