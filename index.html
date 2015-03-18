@@ -5,6 +5,7 @@
     <script src="lib/react-0.12.2.js"></script>
     <script src="lib/JSXTransformer-0.12.2.js"></script>
     <script src="lib/jquery-1.10.0.min.js"></script>
+    <script src="lib/Chart.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
     <link href="bootstrap/css/orig.bootstrap.min.css" rel="stylesheet" >
     <link href="style.css" rel="stylesheet" >
@@ -21,9 +22,13 @@
     </div>
     <script type="text/jsx">
 
+
     /* 
+      Puttz! - A putting game scorer
+
       work in progress !!
-      james@5point6.net on behalf of the disc golf community 
+      (C)2015 James Buchanan (james@5point6.net) on behalf of the disc golf community 
+      https://github.com/twocups/putter
     */
 
 var GameHistoryRow = React.createClass({
@@ -124,6 +129,7 @@ var GameHistoryRow = React.createClass({
         render: function() {
           return (
               <div>
+                <canvas id="myChart" />
                 <p>The putting game is intended to help improve your putting. It consists of 20 rounds of five putts from varying distances. You score points for each putt, scoring more for putts from further away.</p>
                 <p>
                 To prepare for the game mark six positions at 5m, 6m, 7m , 8m, 9m and 10m from the basket. These are your putting positions. You need 5 discs in total.
@@ -143,9 +149,12 @@ var GameHistoryRow = React.createClass({
                 <p>
                   After 20 rounds (100 putts) the game is over and your receive your final score. The maximum score possible is 1000. Good luck!
                 </p>
+                
                 <p>
-                This app was created for the disc golf community by James Buchanan from Croydon Disc Golf Club, London, UK.
+                <h4>Credits</h4>
+                This app was created for the disc golf community by James Buchanan (<a target="_blank" href="http://www.twitter.com/twocups">@twocups</a>) from <a target="_blank"  href="http://www.croydondiscgolf.com">Croydon Disc Golf Club</a>, London, UK.
                 </p>
+                <p>Thumbs up and thanks to JYLY (Markus Lindqvist) who came up with the idea and scoring system for the actual training game itself.</p>
               </div>
             );
         }
@@ -165,7 +174,8 @@ var GameHistoryRow = React.createClass({
         },
         render: function() {
           
-            var amountToShow=5;
+            var amountToShow=5; //default to display
+            var divider=5; //number to cosinder for averages
             var truncateHistory=this.state.truncateHistory;
 
             var truncateStart=this.props.history.length-amountToShow;
@@ -236,9 +246,9 @@ var GameHistoryRow = React.createClass({
           var totalScore=0;
 
 
-          //calc last 3 average for total score and percentages
+          //calc last  average for total score and percentages
           var recent=this.props.history;
-          var startIndex=recent.length-3;
+          var startIndex=recent.length-divider;
 
           if(startIndex < 0) {startIndex=0;}
           _.each(_.rest(recent,startIndex),function(data){
@@ -257,8 +267,8 @@ var GameHistoryRow = React.createClass({
 
 
 
-          var divider=3;
-          if(this.props.history.length <3 ) {divider=this.props.history.length ;}
+          
+          if(this.props.history.length <divider ) {divider=this.props.history.length ;}
         
           var totalAverage=0;
           if(divider>0) {
@@ -302,7 +312,7 @@ var GameHistoryRow = React.createClass({
           if(percents['total'].qty == 0) {percents['total'].avg="n/a";}else {percents['total'].avg=Math.round(percents['total'].percent / percents['total'].qty)+"%"};
 
           var percentPanel=<div className="row">
-          <p className="text-center">Putt success (previous 3)</p>
+          <p className="text-center">Putt success (previous 5)</p>
             <table className="table table-striped">
               <thead>
                 <tr className="veryNarrowCells">
@@ -336,7 +346,7 @@ var GameHistoryRow = React.createClass({
                         Rounds<br />Played
                       </div>
                       <div className="col-xs-4 text-center">
-                        Av. Score<br />Previous 3
+                        Av. Score<br />Previous 5
                       </div>
                       <div className="col-xs-4 text-center">
                         Best<br/>Score
@@ -832,7 +842,7 @@ var GameHistoryRow = React.createClass({
               </a>
               <p className="text-center">Croydon Disc Golf Club</p>
               <p className="text-center">London{"\'"}s only fully basketed disc golf course </p>
-              <p className="text-center"><em>v1.1 Super beta!</em></p>
+              <p className="text-center"><em>v1.2</em></p>
             </div>
           </div>
           </div>
